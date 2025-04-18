@@ -2,6 +2,7 @@ package org.example.objects;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.example.objects.DTO.ReviewDTO;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
@@ -15,11 +16,16 @@ public class Review {
     private BigDecimal rating;
     private String note;
 
-    public Review(String id, BigDecimal rating, String note){
+    public Review(String id, Film film, BigDecimal rating, String note){
         this.id = id;
+        this.film = film;
         this.rating = rating;
         this.note = note;
     }
 
-
+    public Review(ReviewDTO dto){
+        film = dto.getFilm();
+        rating = dto.getRating();
+        note = dto.getNote();
+    }
 }

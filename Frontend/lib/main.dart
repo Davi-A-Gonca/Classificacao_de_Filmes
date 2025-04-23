@@ -40,7 +40,7 @@ class OverflowBarExample extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const Text('Bem vindo! :)'),
+                const Text('Bem vindo à Classificação de Filmes!'),
                 Align(
                   alignment: AlignmentDirectional.centerEnd,
                   child: OverflowBar(

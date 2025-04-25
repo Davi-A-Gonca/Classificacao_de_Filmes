@@ -4,14 +4,32 @@ import 'dart:convert';
 
 void menu() => runApp(MyApp());
 
-class MyApp extends StatelessWidget{
+class Classificacoes {
+  final String nota;
+  final String nome;
+  final String comentario;
+
+  Classificacoes({
+    required this.nota,
+    required this.nome,
+    required this.comentario,
+  });
+
+  factory Classificacoes.fromJson(Map<String, dynamic> json) {
+    return Classificacoes(
+      nota: json['nota'].toString(),
+      nome: json['nome'],
+      comentario: json['comentario'],
+    );
+  }
+}
+
+class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext cotext) {
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Cadastro',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: CadastroScreen(),
     );
   }
@@ -22,8 +40,7 @@ class CadastroScreen extends StatefulWidget {
   _CadastroScreenState createState() => _CadastroScreenState();
 }
 
-class _CadastroScreenState extends State<CadastroScreen>{
-  final TextEditingController _nameController = TextEditingController();
+class _CadastroScreenState extends State<CadastroScreen> {
   final TextEditingController _notaController = TextEditingController();
   final TextEditingController _comentarioController = TextEditingController();
 
@@ -31,16 +48,16 @@ class _CadastroScreenState extends State<CadastroScreen>{
   bool texto2 = false;
   bool texto3 = false;
 
-  String? _character = null;
+  String? _character;
 
-  final url = Uri.parse('https://67ffe0cab72e9cfaf7262e15.mockapi.io/notas');
+  final url = Uri.parse('https://68098de81f1a52874cdd1893.mockapi.io/teste/Notas');
 
-  Future<void> enviarParaAPI(double valor) async {
+  Future<void> enviarParaAPI(double valor, String nome, String comentario) async {
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'nota': valor}),
+        body: jsonEncode({'nota': valor, 'nome': nome, 'comentario': comentario}),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -53,22 +70,79 @@ class _CadastroScreenState extends State<CadastroScreen>{
     }
   }
 
-  @override
-  Widget build(BuildContext context){
+  /// 🔽 Nova versão: retorna uma lista de classificações
+  Future<List<Classificacoes>> listarDados() async {
+    try {
+      final response = await http.get(url);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Cadastro'),
+      if (response.statusCode == 200) {
+        List respostaJson = json.decode(response.body);
+        return respostaJson.map((data) => Classificacoes.fromJson(data)).toList();
+      } else {
+        print('Erro ao buscar dados: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      print('Erro: $e');
+      return [];
+    }
+  }
+
+  /// 🔽 Mostra os dados num AlertDialog
+  Future<void> mostrarClassificacoes() async {
+    List<Classificacoes> classificacoes = await listarDados();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Classificações"),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: classificacoes.isEmpty
+              ? Text('Nenhuma classificação encontrada.')
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: classificacoes.length,
+                  itemBuilder: (context, index) {
+                    final c = classificacoes[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("🎬 Filme: ${c.nome}", style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text("⭐ Nota: ${c.nota}"),
+                          Text("💬 Comentário: ${c.comentario}"),
+                          Divider(),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text("Fechar"),
+          ),
+        ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Cadastro')),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-              ListTile(
-              title: const Text('Lafayette'),
+            ListTile(
+              title: const Text('Godzilla II'),
               leading: Radio<String>(
-                value: "Lafayette",
+                value: "Godzilla II",
                 groupValue: _character,
                 onChanged: (String? value) {
                   setState(() {
@@ -79,9 +153,9 @@ class _CadastroScreenState extends State<CadastroScreen>{
               ),
             ),
             ListTile(
-              title: const Text('Thomas Jefferson'),
+              title: const Text('Robô Selvagem'),
               leading: Radio<String>(
-                value: "Thomas Jefferson",
+                value: "Robo Selvagem",
                 groupValue: _character,
                 onChanged: (String? value) {
                   setState(() {
@@ -95,55 +169,52 @@ class _CadastroScreenState extends State<CadastroScreen>{
             TextField(
               controller: _notaController,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
-              onChanged: (String value) async {
-                setState( () {
-                  if(value.isNotEmpty){
+              onChanged: (String value) {
+                setState(() {
+                  if (value.isNotEmpty) {
                     final texto = value.replaceAll(',', '.');
-                    final nota = double.parse(texto);
-                    if(nota >= 0 && nota <= 5)
-                      texto2 = true;
-                    else
-                      texto2 = false;
-                  }else
-                    texto2 = value.isNotEmpty;
+                    final nota = double.tryParse(texto);
+                    texto2 = nota != null && nota >= 0 && nota <= 5;
+                  } else {
+                    texto2 = false;
+                  }
                 });
               },
-              decoration: InputDecoration(
-                labelText: 'Nota (entre 0-5)',
-              ),
+              decoration: InputDecoration(labelText: 'Nota (entre 0-5)'),
             ),
             SizedBox(height: 20),
             TextField(
               controller: _comentarioController,
-              onChanged: (String value) async {
-                setState( () {
+              onChanged: (String value) {
+                setState(() {
                   texto3 = value.isNotEmpty;
                 });
               },
-              decoration: InputDecoration(
-                labelText: 'Comentários:',
-              ),
+              decoration: InputDecoration(labelText: 'Comentários:'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: texto1 && texto2 && texto3
-                ? () {
-                    String nome = _nameController.text;
-                    final texto = _notaController.text.replaceAll(',', '.');
-                    final nota = double.parse(texto);
-                    String comentario = _comentarioController.text;
-                    enviarParaAPI(nota);
-                    print('$_character');
-                    final snackbar = SnackBar (content: const Text('Nota e comentário adicionados :)'),
-                      action: SnackBarAction(
-                        label: 'Ok',
-                        onPressed: () {},
-                     ),
-                   );
-                  ScaffoldMessenger.of(context).showSnackBar(snackbar);
-                  }
+                  ? () {
+                      final texto = _notaController.text.replaceAll(',', '.');
+                      final nota = double.parse(texto);
+                      enviarParaAPI(nota, _character!, _comentarioController.text);
+
+                      final snackbar = SnackBar(
+                        content: const Text('Nota e comentário adicionados :)'),
+                        action: SnackBarAction(
+                          label: 'Ok',
+                          onPressed: () {},
+                        ),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                    }
                   : null,
               child: Text('Cadastrar'),
+            ),
+            ElevatedButton(
+              onPressed: mostrarClassificacoes,
+              child: Text('Listar classificações'),
             ),
           ],
         ),

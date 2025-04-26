@@ -12,11 +12,13 @@ import java.math.BigDecimal;
 @Setter
 public class Review {
     private String id;
-    private Film film;
+    private String film;
     private BigDecimal rating;
     private String note;
 
-    public Review(String id, Film film, BigDecimal rating, String note){
+    public Review(){}
+
+    public Review(String id, String film, BigDecimal rating, String note){
         this.id = id;
         this.film = film;
         this.rating = rating;

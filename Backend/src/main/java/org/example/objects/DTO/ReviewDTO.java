@@ -9,10 +9,10 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class ReviewDTO {
-    private Film film;
+    private String film;
     private BigDecimal rating;
 
-    public void setFilm(Film film) {
+    public void setFilm(String film) {
         this.film = film;
     }
 
@@ -32,7 +32,7 @@ public class ReviewDTO {
         return rating;
     }
 
-    public Film getFilm() {
+    public String getFilm() {
         return film;
     }
 

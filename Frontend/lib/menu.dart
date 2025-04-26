@@ -5,21 +5,21 @@ import 'dart:convert';
 void menu() => runApp(MyApp());
 
 class Classificacoes {
-  final String nota;
-  final String nome;
-  final String comentario;
+  final String rating;
+  final String film;
+  final String note;
 
   Classificacoes({
-    required this.nota,
-    required this.nome,
-    required this.comentario,
+    required this.rating,
+    required this.film,
+    required this.note,
   });
 
   factory Classificacoes.fromJson(Map<String, dynamic> json) {
     return Classificacoes(
-      nota: json['nota'].toString(),
-      nome: json['nome'],
-      comentario: json['comentario'],
+      rating: json['rating'].toString(),
+      film: json['film'],
+      note: json['note'],
     );
   }
 }
@@ -50,14 +50,14 @@ class _CadastroScreenState extends State<CadastroScreen> {
 
   String? _character;
 
-  final url = Uri.parse('https://68098de81f1a52874cdd1893.mockapi.io/teste/Notas');
+  final url = Uri.parse('http://localhost:8081/projeto/api/v1/review');
 
   Future<void> enviarParaAPI(double valor, String nome, String comentario) async {
     try {
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'nota': valor, 'nome': nome, 'comentario': comentario}),
+        body: jsonEncode({'film': nome, 'rating': valor, 'note': comentario}),
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
@@ -110,9 +110,9 @@ class _CadastroScreenState extends State<CadastroScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("🎬 Filme: ${c.nome}", style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text("⭐ Nota: ${c.nota}"),
-                          Text("💬 Comentário: ${c.comentario}"),
+                          Text("🎬 Filme: ${c.film}", style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text("⭐ Nota: ${c.rating}"),
+                          Text("💬 Comentário: ${c.note}"),
                           Divider(),
                         ],
                       ),

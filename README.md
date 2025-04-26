@@ -11,3 +11,6 @@ Ao rodar o flutter, vai aparecer um site em flutter padrão, com uma caixa no me
 Ao clicar no botão, aparecerá outro site em flutter, com uma lista de filmes em várias Radio Buttons, uma textbox para colocar a classificação do filme escolhido e outra texbox para um comentário.
 Também existe um botão escrito "Cadastrar" que não poderá ser clicado até todos os campos serem preenchidos corretamente, quando forem preenchidos corretamente, com uma nota entre 0-5, um filme escolhido e um comentário feito, o botão será habilitado.
 Clicando no botão, o cometário será enviado para o Banco de dados, e uma SnackBar com a frase "Nota e comentário adicionados com sucesso" irá aparecer.
+Se você tentar adicionar uma nota fora do intervalo 0-5, ou se tentar adicionar a classificação sem comentário, nota ou filme, o botão para cadastrar ficará inativado.
+
+Ao clicar no botão de "Listas classificações", o dart vai pegar os dados salvos na API e listar eles em um showDialog, se nenhuma classificação estiver cadastrada, aparecerá 'nenhuma classificação encontrada'
